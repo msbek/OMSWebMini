@@ -37,6 +37,15 @@ namespace OMSWebMini
 
             services.AddSingleton(c => new SmtpClient());
 
+            services.AddAuthentication("Bearer")
+                    .AddIdentityServerAuthentication("Bearer", options =>
+                    {
+                        options.ApiName = "omsApi";
+                        options.Authority = "https://localhost:5001";
+                    });
+
+
+
             // Register the Swagger services
             services.AddSwaggerDocument();
 
@@ -55,7 +64,7 @@ namespace OMSWebMini
             }
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             // Register the Swagger generator and the Swagger UI middlewares
