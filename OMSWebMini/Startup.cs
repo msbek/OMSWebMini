@@ -44,7 +44,19 @@ namespace OMSWebMini
                         options.Authority = "https://localhost:5001";
                     });
 
-
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("CategoriesScope", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("scope", "omsApi.categories");
+                });
+                options.AddPolicy("ProductsScope", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("scope", "omsApi.products");
+                });
+            });
 
             // Register the Swagger services
             services.AddSwaggerDocument();

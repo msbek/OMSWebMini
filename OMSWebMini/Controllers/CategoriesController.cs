@@ -9,9 +9,9 @@ using OMSWebMini.Data;
 using OMSWebMini.Model;
 namespace OMSWebService.Controllers
 {
+    [Authorize(Policy = "CategoriesScope")]
     [Route("api/[controller]")]
     [ApiController]    
-    [Authorize]
     public class CategoriesController : ControllerBase
     {
         private readonly NORTHWNDContext _context;
@@ -22,6 +22,7 @@ namespace OMSWebService.Controllers
         }
 
         // GET: api/categories?include_picture=true
+        [Authorize(Roles ="Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories(
             bool include_pictures = false)

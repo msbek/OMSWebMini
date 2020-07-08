@@ -22,11 +22,11 @@ namespace IdentityServer
             var services = new ServiceCollection();
             services.AddLogging();
             services.AddDbContext<ApplicationDbContext>(options =>
-               options.UseSqlite(connectionString));
+              options.UseSqlite(connectionString));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+               .AddEntityFrameworkStores<ApplicationDbContext>()
+               .AddDefaultTokenProviders();
 
             using (var serviceProvider = services.BuildServiceProvider())
             {
@@ -35,7 +35,12 @@ namespace IdentityServer
                     var context = scope.ServiceProvider.GetService<ApplicationDbContext>();
                     context.Database.Migrate();
 
+                    var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                    roleMgr.CreateAsync(new IdentityRole(UserRoles.Admin));
+                    roleMgr.CreateAsync(new IdentityRole(UserRoles.User));
+
                     var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
                     var alice = userMgr.FindByNameAsync("alice").Result;
                     if (alice == null)
                     {
@@ -50,6 +55,7 @@ namespace IdentityServer
                         {
                             throw new Exception(result.Errors.First().Description);
                         }
+                        result = userMgr.AddToRoleAsync(alice, UserRoles.Admin).Result;
 
                         result = userMgr.AddClaimsAsync(alice, new Claim[]{
                             new Claim(JwtClaimTypes.Name, "Alice Smith"),
@@ -69,6 +75,7 @@ namespace IdentityServer
                     }
 
                     var bob = userMgr.FindByNameAsync("bob").Result;
+
                     if (bob == null)
                     {
                         bob = new ApplicationUser
@@ -77,11 +84,13 @@ namespace IdentityServer
                             Email = "BobSmith@email.com",
                             EmailConfirmed = true
                         };
+
                         var result = userMgr.CreateAsync(bob, "Pass123$").Result;
                         if (!result.Succeeded)
                         {
                             throw new Exception(result.Errors.First().Description);
                         }
+                        result = userMgr.AddToRoleAsync(bob, UserRoles.User).Result;
 
                         result = userMgr.AddClaimsAsync(bob, new Claim[]{
                             new Claim(JwtClaimTypes.Name, "Bob Smith"),

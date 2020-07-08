@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using IdentityModel;
 using IdentityServer4.Models;
 using System.Collections.Generic;
 
@@ -13,7 +14,12 @@ namespace IdentityServer
                 new IdentityResource[]
                    {
                         new IdentityResources.OpenId(),
-                        new IdentityResources.Profile()
+                        new IdentityResources.Profile(),
+                        new IdentityResource()
+                        {
+                             Name = JwtClaimTypes.Role,
+                             UserClaims = new List<string>(){"role"}
+                        }
                    };
         public static IEnumerable<ApiResource> ApiResources =>
          new[]
@@ -23,10 +29,11 @@ namespace IdentityServer
                     Name = "omsApi",
                     DisplayName = "OMS API",
                     Description = "Allow the application to access OMSApi on your behalf",
-                    Scopes = new List<string> {"omsApi.categories", "omsApi.products"}
+                    Scopes = new List<string> {"omsApi.categories", "omsApi.products"},
+                    UserClaims = new List<string> { JwtClaimTypes.Role }
                 }
             };
-    
+
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
             {
@@ -46,7 +53,7 @@ namespace IdentityServer
                     AllowedGrantTypes = GrantTypes.ClientCredentials,
                     ClientSecrets = { new Secret("511536EF-F270-4058-80CA-1C89C192F69A".Sha256()) },
 
-                    AllowedScopes = { "omsApi.products", "omsApi.categories" }
+                    AllowedScopes = {"openid", "profile", JwtClaimTypes.Role, "omsApi.products", "omsApi.categories"}
                 },
 
                 // interactive client using code flow + pkce
